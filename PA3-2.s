@@ -1,5 +1,6 @@
 @Vending machine code
-
+@Robert Leeland
+@PA3-2.s	
     .global main
     .extern printf
 main:
@@ -14,6 +15,7 @@ main:
     BL printf
     LDR R0, =msg4
     BL printf
+Loop:	
     @@@ Have user enter in their selection
     @@@ Store selection in variable select
     LDR R0, =inp
@@ -32,25 +34,44 @@ main:
     LDR R1, [R1]     @Value of select in R1
 
     @Your modifications will begin at this point
-
+	@ We are trying to modify this so that all
+	@ of the BAL and BEQ are replaced with a
+	@ streamlined set on conditional statements.
+    @used to compare the selection and if = put 75 in R3
     CMP R1, #1       @Check for "peanuts"
-    BEQ _peanut      @If user entered 1 goto _peanuts
+    MOVEQ R3, #75    @If user entered 1 goto _peanuts/replace
+    @used to compare the selection and if = put 125 in R3
     CMP R1, #2       @Check for "chocolate"
-    BEQ _choc        @If user entered 2 goto _choc
+    MOVEQ R3, #125   @If user entered 2 goto _choc/replace
+    @used to compare the selection and if = put 90 in R3
     CMP R1, #3       @Check for "pretzels"
-    BEQ _pretzel     @If user entered 3 goto _pretzel
-    LDR R0, =msg7    @If we get here user entered
-                     @an illegal selection so print
-                     @error message and terminate
-    BL printf
+    MOVEQ R3, #90    @If user entered 3 goto _pretzel/replace
+    @Pulled from the _compute branch and moved up
+    LDR R4, =quantity
+    LDR R4, [R4]
+    MUL R1, R3, R4
+    LDR R0, =msg6
+    BL printf   
+    MOV R7, #0 
+    SWI #0
+	@ Tried a few things here that didnt work out. added an EQ/NE
+	@ conditions to the LDR/MOV/SWI options to try and get them
+	@ to be executed only if for the top part above if equal
+	@ and below part if not equal but the suffixes didn't seem to
+	@ affect the commands
+    LDR R0, =msg7   @If we get here user entered
+                    @an illegal selection so print
+                    @error message and terminate
+    BL printf	
     MOV R7, #1
     SWI #0           @Terminate, error condition
+
 _peanut:
     MOV R3, #75      @Move 75 cents into R3
-    BAL _compute
+    BAL _compute	
 _choc:
     MOV R3, #125     @Move 125 cents into R3
-    BAL _compute
+    BAL _compute	
 _pretzel:
     MOV R3, #90      @Move 90 cents into R3
 _compute:
